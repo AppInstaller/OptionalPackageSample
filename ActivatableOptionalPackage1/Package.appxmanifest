@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3" IgnorableNamespaces="uap mp uap3">
+  <Identity Name="29270depappf.ActivatableOptional1" Publisher="CN=066DE2AA-54DF-41B3-8BE8-3CBF6D3088A7" Version="1.1.6.0" />
+  <mp:PhoneIdentity PhoneProductId="d52209c8-dd16-4214-ae72-de1cc9e0300b" PhonePublisherId="b4f1334c-7233-48f2-a953-79ce27fbcfb5" />
+  <Properties>
+    <DisplayName>ActivatableOptional1</DisplayName>
+    <PublisherDisplayName>depappf</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Dependencies>
+    <!--
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.15025.0" MaxVersionTested="10.0.15025.0" />
+    -->
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.15025.0" MaxVersionTested="10.0.15025.0" />
+    <TargetDeviceFamily Name="Windows.Mobile" MinVersion="10.0.15025.0" MaxVersionTested="10.0.15025.0" />
+    <TargetDeviceFamily Name="Windows.Holographic" MinVersion="10.0.15025.0" MaxVersionTested="10.0.15025.0" />
+    <uap3:MainPackageDependency Name="29270depappf.AtomicSuite" />
+  </Dependencies>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App45" Executable="$targetnametoken$.exe" EntryPoint="ActivatableOptionalPackage1.App1">
+      <uap:VisualElements DisplayName="ActivatableOptional1" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="ActivatableOptionalPackage1" BackgroundColor="transparent">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
+        </uap:DefaultTile>
+        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+</Package>
