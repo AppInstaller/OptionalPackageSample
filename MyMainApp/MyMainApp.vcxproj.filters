@@ -56,4 +56,7 @@
   <ItemGroup>
     <Page Include="MainPage.xaml" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Bundle.Mapping.txt" />
+  </ItemGroup>
 </Project>
