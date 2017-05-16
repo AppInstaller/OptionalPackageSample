@@ -55,11 +55,11 @@
     <Page Include="MainPage.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Content\SampleDLCFile.txt">
-      <Filter>Content</Filter>
-    </Text>
+    <None Include="OptionalPackage_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="MyMainApp_StoreKey.pfx" />
+    <Text Include="Content\SampleFile.txt">
+      <Filter>Content</Filter>
+    </Text>
   </ItemGroup>
 </Project>

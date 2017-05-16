@@ -7,8 +7,8 @@
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>true</AppContainerApplication>
     <ApplicationType>Windows Store</ApplicationType>
-    <WindowsTargetPlatformVersion>10.0.15058.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformMinVersion>10.0.15058.0</WindowsTargetPlatformMinVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.15063.0</WindowsTargetPlatformMinVersion>
     <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -97,11 +97,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <PackageCertificateKeyFile>MyMainApp_StoreKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateKeyFile>OptionalPackage_TemporaryKey.pfx</PackageCertificateKeyFile>
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>4434DAF09CAB31F4DF55A2CB451F535D1E5BFEB9</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>36614B54BB478456A8B9E92D1CEFDF21DD4D84EB</PackageCertificateThumbprint>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
@@ -187,10 +187,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Content\SampleDLCFile.txt" />
+    <Text Include="Content\SampleFile.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="MyMainApp_StoreKey.pfx" />
+    <None Include="OptionalPackage_TemporaryKey.pfx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -7,8 +7,8 @@
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>true</AppContainerApplication>
     <ApplicationType>Windows Store</ApplicationType>
-    <WindowsTargetPlatformVersion>10.0.15058.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformMinVersion>10.0.15058.0</WindowsTargetPlatformMinVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.15063.0</WindowsTargetPlatformMinVersion>
     <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
     <XamlResourceMapName>29270depappf.ActivatableOptional2</XamlResourceMapName>
     <XamlComponentResourceLocation>Application</XamlComponentResourceLocation>
@@ -99,11 +99,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <PackageCertificateKeyFile>ActivatableOptionalPackage2_StoreKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>BC660CFF5FFBB36009A83477F65E80A96FD5B668</PackageCertificateThumbprint>
+    <PackageCertificateKeyFile>ActivatableOptionalPackage2_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateThumbprint>043C19AB9AAD6D8131C6BF16507FE557AA9C079D</PackageCertificateThumbprint>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
-    <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x86</AppxBundlePlatforms>
+    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
@@ -162,7 +163,6 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="ActivatableOptionalPackage2_StoreKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png" />
@@ -190,12 +190,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Content\SampleDLCFile.txt" />
+    <Text Include="Content\SampleFile.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OptionalPackageDLL\OptionalPackageDLL.vcxproj">
       <Project>{5887cd9c-428e-4151-914b-14b7ed6e0301}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ActivatableOptionalPackage2_TemporaryKey.pfx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

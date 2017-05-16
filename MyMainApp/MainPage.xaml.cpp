@@ -104,7 +104,7 @@ void MainPage::LoadTextFromPackage(Windows::ApplicationModel::Package^ package)
 			{
 				auto assetsFolder = result.get();				
 
-				auto fileAsyncOp = assetsFolder->GetFileAsync(L"SampleDLCFile.txt");
+				auto fileAsyncOp = assetsFolder->GetFileAsync(L"SampleFile.txt");
 
 				concurrency::create_task(fileAsyncOp)
 					.then([this](concurrency::task< Windows::Storage::StorageFile^ > task)
@@ -115,7 +115,7 @@ void MainPage::LoadTextFromPackage(Windows::ApplicationModel::Package^ package)
 
 						if (targetFile->IsAvailable)
 						{
-							WriteToTextBox("Found SampleDLCFile.txt - loading contents");
+							WriteToTextBox("Found SampleFile.txt - loading contents");
 							DebugPrint(L"    %ws is available:\n", targetFile->Name->Data());
 							concurrency::create_task(targetFile->OpenAsync(Windows::Storage::FileAccessMode::Read))
 								.then([this, targetFile](concurrency::task< Windows::Storage::Streams::IRandomAccessStream^ > task)
@@ -178,8 +178,8 @@ void MainPage::LoadTextFromPackage(Windows::ApplicationModel::Package^ package)
 
 void MainPage::LoadDLLFromPackage(Windows::ApplicationModel::Package^ package)
 {
-	Windows::Storage::StorageFolder^ dlcFolder = package->InstalledLocation;
-	auto asyncOp = dlcFolder->GetFileAsync(L"OptionalPackageDLL.dll");
+	Windows::Storage::StorageFolder^ Folder = package->InstalledLocation;
+	auto asyncOp = Folder->GetFileAsync(L"OptionalPackageDLL.dll");
 
 	Concurrency::create_task(asyncOp)
 		.then([this, package](concurrency::task< Windows::Storage::StorageFile^ > task)
@@ -223,8 +223,8 @@ void MainPage::LoadDLLFromPackage(Windows::ApplicationModel::Package^ package)
 					HRESULT hr = HRESULT_FROM_WIN32(GetLastError());
 					if (hr == 0x8007007e) //ERROR_MOD_NOT_FOUND
 					{
-						DebugPrint(L"    ERROR_MOD_NOT_FOUND - To load a .dll from OP you have to restart the app in RS1\n");
-						WriteToTextBox("Could not load dll from OP - ERROR_MOD_NOT_FOUND. Make sure that your op is in an atomic set.");
+						DebugPrint(L"    Could not load dll from OP - ERROR_MOD_NOT_FOUND. Make sure that your op is in a related set.\n");
+						WriteToTextBox("Could not load dll from OP - ERROR_MOD_NOT_FOUND. Make sure that your op is in a related set.");
 					}
 					else
 					{

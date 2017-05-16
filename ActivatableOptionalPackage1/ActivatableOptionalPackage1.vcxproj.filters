@@ -52,15 +52,14 @@
     <AppxManifest Include="Package.appxmanifest" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ActivatableOptionalPackage1_TemporaryKey.pfx" />
-    <None Include="ActivatableOptionalPackage1_StoreKey.pfx" />
     <None Include="ms.pfx" />
+    <None Include="ActivatableOptionalPackage1_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainPage.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Content\SampleDLCFile.txt">
+    <Text Include="Content\SampleFile.txt">
       <Filter>Content</Filter>
     </Text>
   </ItemGroup>

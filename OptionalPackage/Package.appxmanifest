@@ -8,14 +8,14 @@
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.14994.0" MaxVersionTested="10.0.14994.0" />
-    <uap3:MainPackageDependency Name="29270depappf.AppSuiteTest" />
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.15063.0" MaxVersionTested="10.0.15063.0" />
+    <uap3:MainPackageDependency Name="29270depappf.AtomicSuite" />
   </Dependencies>
   <Resources>
     <Resource Language="x-generate" />
   </Resources>
   <Applications>
-    <Application Id="App1" Executable="$targetnametoken$.exe" EntryPoint="OptionalPackage.App1">
+    <Application Id="op" Executable="$targetnametoken$.exe" EntryPoint="OptionalPackage.op">
       <uap:VisualElements AppListEntry="none" DisplayName="OptionalPackage" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="ActivatableOptionalPackage" BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
         </uap:DefaultTile>

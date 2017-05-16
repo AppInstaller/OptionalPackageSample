@@ -49,12 +49,10 @@
     <AppxManifest Include="Package.appxmanifest" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="MyMainApp_TemporaryKey.pfx" />
-    <None Include="Package.StoreAssociation.xml" />
-    <None Include="MyMainApp_StoreKey.pfx" />
+    <Page Include="MainPage.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="MainPage.xaml" />
+    <None Include="MyMainApp_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Bundle.Mapping.txt" />
