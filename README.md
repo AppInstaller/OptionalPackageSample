@@ -9,7 +9,7 @@ The MyMainApp is the main project that loads content form its optional packages.
 
 Read more about optional packages here - https://blogs.msdn.microsoft.com/appinstaller/2017/04/05/uwpoptionalpackages/
 
-How to deploy?
+## How to deploy?
 Via the Visual Studio Solution Explorer
 
 1. Right click MyMainApp project and deploy it. This will also deploy ActivatableOptionalPackage1 & ActivatableOptionalPackage2
