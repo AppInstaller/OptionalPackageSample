@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26313.0
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MyMainApp", "MyMainApp\MyMainApp.vcxproj", "{EAF0BDEE-941C-4FC0-AF41-B6E425C55636}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OptionalPackage", "OptionalPackage\OptionalPackage.vcxproj", "{15195583-7E99-4F0E-B15F-4E37C06DEF87}"
 	ProjectSection(ProjectDependencies) = postProject
-		{EAF0BDEE-941C-4FC0-AF41-B6E425C55636} = {EAF0BDEE-941C-4FC0-AF41-B6E425C55636}
+		{5887CD9C-428E-4151-914B-14B7ED6E0301} = {5887CD9C-428E-4151-914B-14B7ED6E0301}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OptionalPackageDLL", "OptionalPackageDLL\OptionalPackageDLL.vcxproj", "{5887CD9C-428E-4151-914B-14B7ED6E0301}"
@@ -113,5 +113,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5739228D-D4DA-4999-AC08-5AE7C2E0010C}
 	EndGlobalSection
 EndGlobal
