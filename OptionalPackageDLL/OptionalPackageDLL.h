@@ -1,5 +1,2 @@
 ﻿#pragma once
-extern "C"
-{
-    __declspec(dllexport) int __cdecl ExampleAPIExport();
-}
+EXTERN_C __declspec(dllexport) int __stdcall ExampleAPIExport();

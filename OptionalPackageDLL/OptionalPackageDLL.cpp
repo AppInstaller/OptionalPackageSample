@@ -2,7 +2,7 @@
 #include "OptionalPackageDLL.h"
 
 // Optional Package Code
-__declspec(dllexport) int __cdecl ExampleAPIExport()
+EXTERN_C __declspec(dllexport)  int __stdcall ExampleAPIExport()
 {
     return 40;
 }
