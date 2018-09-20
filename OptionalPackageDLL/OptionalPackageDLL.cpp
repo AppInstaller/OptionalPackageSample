@@ -4,7 +4,5 @@
 // Optional Package Code
 __declspec(dllexport) int __cdecl ExampleAPIExport()
 {
-	return 40;
+    return 40;
 }
-
-
