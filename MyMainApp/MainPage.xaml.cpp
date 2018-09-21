@@ -84,55 +84,41 @@ void MainPage::OnPackageInstalling(Windows::ApplicationModel::PackageCatalog ^se
 
 void MainPage::LoadTextFromPackage(Windows::ApplicationModel::Package^ package)
 {
-    concurrency::create_task(package->InstalledLocation->TryGetItemAsync(L"Content"))
+    concurrency::create_task(package->InstalledLocation->TryGetItemAsync(LR"(Content\SampleFile.txt)"))
         .then([this](concurrency::task<Windows::Storage::IStorageItem^> result)
     {
-        auto contentItem = result.get();
-        if (contentItem)
+        if (result.get())
         {
-            auto contentFolder = safe_cast<Windows::Storage::StorageFolder^>(contentItem);
-
-            concurrency::create_task(contentFolder->TryGetItemAsync(L"SampleFile.txt"))
-                .then([this](concurrency::task<Windows::Storage::IStorageItem^> result)
+            auto sampleFile = safe_cast<Windows::Storage::StorageFile^>(result.get());
+            if (sampleFile->IsAvailable)
             {
-                if (result.get())
+                WriteToTextBox("Found SampleFile.txt - loading contents");
+                DebugPrint(L"    %ws is available:\n", sampleFile->Name->Data());
+                concurrency::create_task(sampleFile->OpenAsync(Windows::Storage::FileAccessMode::Read))
+                    .then([this, sampleFile](concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> task)
                 {
-                    auto sampleFile = safe_cast<Windows::Storage::StorageFile^>(result.get());
-                    if (sampleFile->IsAvailable)
+                    auto readStream = task.get();
+                    UINT64 const size = readStream->Size;
+                    if (size <= MAXUINT32)
                     {
-                        WriteToTextBox("Found SampleFile.txt - loading contents");
-                        DebugPrint(L"    %ws is available:\n", sampleFile->Name->Data());
-                        concurrency::create_task(sampleFile->OpenAsync(Windows::Storage::FileAccessMode::Read))
-                            .then([this, sampleFile](concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> task)
+                        auto dataReader = ref new Windows::Storage::Streams::DataReader(readStream);
+                        concurrency::create_task(dataReader->LoadAsync(static_cast<UINT32>(size)))
+                            .then([this, sampleFile, dataReader](unsigned int numBytesLoaded)
                         {
-                            auto readStream = task.get();
-                            UINT64 const size = readStream->Size;
-                            if (size <= MAXUINT32)
-                            {
-                                auto dataReader = ref new Windows::Storage::Streams::DataReader(readStream);
-                                concurrency::create_task(dataReader->LoadAsync(static_cast<UINT32>(size)))
-                                    .then([this, sampleFile, dataReader](unsigned int numBytesLoaded)
-                                {
-                                    auto fileContent = dataReader->ReadString(numBytesLoaded);
+                            auto fileContent = dataReader->ReadString(numBytesLoaded);
 
-                                    WriteToTextBox(fileContent);
+                            WriteToTextBox(fileContent);
 
-                                    delete dataReader; // As a best practice, explicitly close the dataReader resource as soon as it is no longer needed.
-                                    DebugPrint(L"        %ws\n", fileContent->Data());
-                                });
-                            }
-                        }).wait();
+                            delete dataReader; // As a best practice, explicitly close the dataReader resource as soon as it is no longer needed.
+                            DebugPrint(L"        %ws\n", fileContent->Data());
+                        });
                     }
-                }
-                else
-                {
-                    DebugPrint(L"    SampleFile.txt not available\n");
-                }
-            }).wait();
+                }).wait();
+            }
         }
         else
         {
-            DebugPrint(L"    Content folder not available\n");
+            DebugPrint(L"    SampleFile.txt not available\n");
         }
     }).wait();
 }
@@ -150,7 +136,6 @@ void MainPage::LoadDLLFromPackage(Windows::ApplicationModel::Package^ package)
                 if (targetFile->IsAvailable)
                 {
                     DebugPrint(L"    %ws is available:\n", targetFile->Name->Data());
-                    auto path = targetFile->Path->Data();
                     auto name = targetFile->Name->Data();
                     auto dllModule = LoadPackagedLibrary(name, 0);
                     if (dllModule)
@@ -168,8 +153,8 @@ void MainPage::LoadDLLFromPackage(Windows::ApplicationModel::Package^ package)
                     }
                     else
                     {
-                        DWORD error = GetLastError();
-                        error = error;
+                        const DWORD error = GetLastError();
+                        DebugPrint(L"        LoadPackagedLibrary failed, make sure package certificates are configured: %i\n", error);
                     }
                 }
             }
