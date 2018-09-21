@@ -20,7 +20,6 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace Windows::UI::Core;
 
-
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 MainPage::MainPage()
 {
@@ -28,12 +27,12 @@ MainPage::MainPage()
     HookupCatalog();
 }
 
-void MainPage::ReadOptionalPackageContent()
+void MainPage::ReadOptionalPackageContentAsync()
 {
     concurrency::create_task([this]()
     {
         WriteToTextBox("Enumerating Packages");
-        auto optionalPackages = EnumerateInstalledPackages();
+        auto optionalPackages = GetOptionalPackages();
         for (auto package : optionalPackages)
         {
             Platform::String^ packageName = ref new String(package->Id->FullName->Data());
@@ -49,7 +48,7 @@ void MainPage::ReadOptionalPackageContent()
     });
 }
 
-std::vector<Windows::ApplicationModel::Package^> MainPage::EnumerateInstalledPackages()
+std::vector<Windows::ApplicationModel::Package^> MainPage::GetOptionalPackages()
 {
     DebugPrint(L"    Searching for optional packages...\n");
 
@@ -58,7 +57,6 @@ std::vector<Windows::ApplicationModel::Package^> MainPage::EnumerateInstalledPac
 
     for (auto package : Windows::ApplicationModel::Package::Current->Dependencies)
     {
-        //  If it is optional, then add it to our results vector
         if (package->IsOptional)
         {
             DebugPrint(L"    Optional Package found - %ws\n", package->Id->FullName->Data());
@@ -86,104 +84,79 @@ void MainPage::OnPackageInstalling(Windows::ApplicationModel::PackageCatalog ^se
 
 void MainPage::LoadTextFromPackage(Windows::ApplicationModel::Package^ package)
 {
-    try
+    concurrency::create_task(package->InstalledLocation->TryGetItemAsync(L"Content"))
+        .then([this](concurrency::task<Windows::Storage::IStorageItem^> result)
     {
-        concurrency::create_task(package->InstalledLocation->GetFolderAsync(L"Content"))
-            .then([this](concurrency::task< Windows::Storage::StorageFolder^ > result)
+        auto contentItem = result.get();
+        if (contentItem)
         {
-            try
+            auto contentFolder = safe_cast<Windows::Storage::StorageFolder^>(contentItem);
+
+            concurrency::create_task(contentFolder->TryGetItemAsync(L"SampleFile.txt"))
+                .then([this](concurrency::task<Windows::Storage::IStorageItem^> result)
             {
-                auto assetsFolder = result.get();
-
-                auto fileAsyncOp = assetsFolder->GetFileAsync(L"SampleFile.txt");
-
-                concurrency::create_task(fileAsyncOp)
-                    .then([this](concurrency::task<Windows::Storage::StorageFile^> task)
+                if (result.get())
                 {
-                    try
+                    auto sampleFile = safe_cast<Windows::Storage::StorageFile^>(result.get());
+                    if (sampleFile->IsAvailable)
                     {
-                        auto targetFile = task.get();
-
-                        if (targetFile->IsAvailable)
+                        WriteToTextBox("Found SampleFile.txt - loading contents");
+                        DebugPrint(L"    %ws is available:\n", sampleFile->Name->Data());
+                        concurrency::create_task(sampleFile->OpenAsync(Windows::Storage::FileAccessMode::Read))
+                            .then([this, sampleFile](concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> task)
                         {
-                            WriteToTextBox("Found SampleFile.txt - loading contents");
-                            DebugPrint(L"    %ws is available:\n", targetFile->Name->Data());
-                            concurrency::create_task(targetFile->OpenAsync(Windows::Storage::FileAccessMode::Read))
-                                .then([this, targetFile](concurrency::task< Windows::Storage::Streams::IRandomAccessStream^ > task)
+                            auto readStream = task.get();
+                            UINT64 const size = readStream->Size;
+                            if (size <= MAXUINT32)
                             {
-                                try
+                                auto dataReader = ref new Windows::Storage::Streams::DataReader(readStream);
+                                concurrency::create_task(dataReader->LoadAsync(static_cast<UINT32>(size)))
+                                    .then([this, sampleFile, dataReader](unsigned int numBytesLoaded)
                                 {
-                                    auto readStream = task.get();
-                                    UINT64 const size = readStream->Size;
-                                    if (size <= MAXUINT32)
-                                    {
-                                        auto dataReader = ref new Windows::Storage::Streams::DataReader(readStream);
-                                        concurrency::create_task(dataReader->LoadAsync(static_cast<UINT32>(size)))
-                                            .then([this, targetFile, dataReader](unsigned int numBytesLoaded)
-                                        {
-                                            Platform::String^ fileContent = dataReader->ReadString(numBytesLoaded);
+                                    auto fileContent = dataReader->ReadString(numBytesLoaded);
 
-                                            WriteToTextBox(fileContent);
+                                    WriteToTextBox(fileContent);
 
-                                            delete dataReader; // As a best practice, explicitly close the dataReader resource as soon as it is no longer needed.
-                                            DebugPrint(L"        %ws\n", fileContent->Data());
-                                        });
-                                    }
-                                    else
-                                    {
-                                        delete readStream; // As a best practice, explicitly close the readStream resource as soon as it is no longer needed.
-                                        DebugPrint(L"    File %ws is too big for LoadAsync to load in a single chunk. Files larger than 4GB need to be broken into multiple chunks to be loaded by LoadAsync.", targetFile->Name->Data());
-                                    }
-                                }
-                                catch (Platform::Exception^ ex)
-                                {
-                                    DebugPrint(L"    Error 0x%x reading text file\n", ex->HResult);
-                                }
-                            }).wait();
-                        }
-                        else
-                        {
-                            DebugPrint(L"    File not available\n");
-                        }
+                                    delete dataReader; // As a best practice, explicitly close the dataReader resource as soon as it is no longer needed.
+                                    DebugPrint(L"        %ws\n", fileContent->Data());
+                                });
+                            }
+                        }).wait();
                     }
-                    catch (Platform::Exception^ ex)
-                    {
-                        DebugPrint(L"   Error 0x%x getting text file\n", ex->HResult);
-                    }
-                }).wait();
-            }
-            catch (Platform::Exception^ ex)
-            {
-                DebugPrint(L"    Error 0x%x getting Contents folder\n", ex->HResult);
-            }
-
-        }).wait();
-    }
-    catch (Platform::Exception^ ex)
-    {
-        DebugPrint(L"    Error 0x%x\n", ex->HResult);
-    }
+                }
+                else
+                {
+                    DebugPrint(L"    SampleFile.txt not available\n");
+                }
+            }).wait();
+        }
+        else
+        {
+            DebugPrint(L"    Content folder not available\n");
+        }
+    }).wait();
 }
 
 void MainPage::LoadDLLFromPackage(Windows::ApplicationModel::Package^ package)
 {
-    auto asyncOp = package->InstalledLocation->GetFileAsync(L"OptionalPackageDLL.dll");
-
-    concurrency::create_task(asyncOp)
-        .then([this, package](concurrency::task< Windows::Storage::StorageFile^ > task)
+    concurrency::create_task(package->InstalledLocation->TryGetItemAsync(L"OptionalPackageDLL.dll"))
+        .then([this, package](concurrency::task<Windows::Storage::IStorageItem^> task)
     {
-        try
+        if (task.get())
         {
-            auto targetFile = task.get();
-            if (targetFile->IsAvailable)
+            auto targetFile = safe_cast<Windows::Storage::StorageFile^>(task.get());
+            if (targetFile)
             {
-                DebugPrint(L"    %ws is available:\n", targetFile->Name->Data());
-                auto dllModule = LoadPackagedLibrary(targetFile->Name->Data(), 0);
-                if (dllModule)
+                if (targetFile->IsAvailable)
                 {
-                    WriteToTextBox("Contains dll - loading code");
-                    try
+                    DebugPrint(L"    %ws is available:\n", targetFile->Name->Data());
+                    auto path = targetFile->Path->Data();
+                    auto name = targetFile->Name->Data();
+                    auto dllModule = LoadPackagedLibrary(name, 0);
+                    if (dllModule)
                     {
+                        WriteToTextBox("Contains dll - loading code");
+
                         auto procAddress = GetProcAddress(dllModule, "ExampleAPIExport");
                         if (procAddress)
                         {
@@ -191,45 +164,20 @@ void MainPage::LoadDLLFromPackage(Windows::ApplicationModel::Package^ package)
                             auto ret = procAddress();
                             WriteToTextBox(ret.ToString());
                         }
-                        else
-                        {
-                            DWORD error = GetLastError();
-                            error = error;
-                        }
-                    }
-                    catch (Platform::Exception^ ex)
-                    {
-                        DebugPrint(L"    Error getting address for ExampleAPIExport 0x%x\n", GetLastError());
-                    }
-                    FreeLibrary(dllModule);
-                }
-                else
-                {
-                    HRESULT hr = HRESULT_FROM_WIN32(GetLastError());
-                    if (hr == HRESULT_FROM_WIN32(ERROR_MOD_NOT_FOUND))
-                    {
-                        DebugPrint(L"    Could not load dll from OP - ERROR_MOD_NOT_FOUND. Make sure that your op is in a related set.\n");
-                        WriteToTextBox("Could not load dll from OP - ERROR_MOD_NOT_FOUND. Make sure that your op is in a related set.");
+                        FreeLibrary(dllModule);
                     }
                     else
                     {
-                        DebugPrint(L"    Error getting DLL file in package 0x%x\n", hr);
-                        WriteToTextBox("Error getting DLL file in package");
+                        DWORD error = GetLastError();
+                        error = error;
                     }
                 }
             }
-        }
-        catch (Platform::Exception^ ex)
-        {
-            if (ex->HResult == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
-            {
-                DebugPrint(L"    No DLL to load in package\n");
-            }
             else
             {
-                DebugPrint(L"    Error 0x%x loading DLL file from OP package\n    %ws\n", ex->HResult, ex->Message->Data());
+                DebugPrint(L"    Could not load dll from the optional package, make sure it is installed.\n");
+                WriteToTextBox("Could not load dll from the optional package, make sure it is installed.");
             }
-
         }
     }).wait();
 }
@@ -245,7 +193,7 @@ void MainPage::WriteToTextBox(Platform::String^ str)
 
 void MyMainApp::MainPage::button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-    ReadOptionalPackageContent();
+    ReadOptionalPackageContentAsync();
 }
 
 
