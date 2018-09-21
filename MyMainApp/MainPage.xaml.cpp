@@ -20,7 +20,6 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace Windows::UI::Core;
 
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 MainPage::MainPage()
 {
     InitializeComponent();
@@ -35,7 +34,7 @@ void MainPage::ReadOptionalPackageContentAsync()
         auto optionalPackages = GetOptionalPackages();
         for (auto package : optionalPackages)
         {
-            Platform::String^ packageName = ref new String(package->Id->FullName->Data());
+            auto packageName = ref new String(package->Id->FullName->Data());
             WriteToTextBox(packageName);
 
             LoadTextFromPackage(package);
@@ -84,41 +83,40 @@ void MainPage::OnPackageInstalling(Windows::ApplicationModel::PackageCatalog ^se
 
 void MainPage::LoadTextFromPackage(Windows::ApplicationModel::Package^ package)
 {
-    concurrency::create_task(package->InstalledLocation->TryGetItemAsync(LR"(Content\SampleFile.txt)"))
-        .then([this](concurrency::task<Windows::Storage::IStorageItem^> result)
+    auto sampleFileRelPath = ref new Platform::String(LR"(Content\SampleFile.txt)");
+    concurrency::create_task(package->InstalledLocation->TryGetItemAsync(sampleFileRelPath))
+        .then([this, sampleFileRelPath](concurrency::task<Windows::Storage::IStorageItem^> result)
     {
-        if (result.get())
+        // maybe null (try failed) or might be a folder, not a file.
+        auto sampleFile = dynamic_cast<Windows::Storage::StorageFile^>(result.get());
+        if (sampleFile && sampleFile->IsAvailable)
         {
-            auto sampleFile = safe_cast<Windows::Storage::StorageFile^>(result.get());
-            if (sampleFile->IsAvailable)
+            WriteToTextBox("Found SampleFile.txt - loading contents");
+            DebugPrint(L"    %ws is available:\n", sampleFile->Name->Data());
+            concurrency::create_task(sampleFile->OpenAsync(Windows::Storage::FileAccessMode::Read))
+                .then([this, sampleFile](concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> task)
             {
-                WriteToTextBox("Found SampleFile.txt - loading contents");
-                DebugPrint(L"    %ws is available:\n", sampleFile->Name->Data());
-                concurrency::create_task(sampleFile->OpenAsync(Windows::Storage::FileAccessMode::Read))
-                    .then([this, sampleFile](concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> task)
+                auto readStream = task.get();
+                UINT64 const size = readStream->Size;
+                if (size <= MAXUINT32)
                 {
-                    auto readStream = task.get();
-                    UINT64 const size = readStream->Size;
-                    if (size <= MAXUINT32)
+                    auto dataReader = ref new Windows::Storage::Streams::DataReader(readStream);
+                    concurrency::create_task(dataReader->LoadAsync(static_cast<UINT32>(size)))
+                        .then([this, sampleFile, dataReader](unsigned int numBytesLoaded)
                     {
-                        auto dataReader = ref new Windows::Storage::Streams::DataReader(readStream);
-                        concurrency::create_task(dataReader->LoadAsync(static_cast<UINT32>(size)))
-                            .then([this, sampleFile, dataReader](unsigned int numBytesLoaded)
-                        {
-                            auto fileContent = dataReader->ReadString(numBytesLoaded);
+                        auto fileContent = dataReader->ReadString(numBytesLoaded);
 
-                            WriteToTextBox(fileContent);
+                        WriteToTextBox(fileContent);
 
-                            delete dataReader; // As a best practice, explicitly close the dataReader resource as soon as it is no longer needed.
-                            DebugPrint(L"        %ws\n", fileContent->Data());
-                        });
-                    }
-                }).wait();
-            }
+                        delete dataReader; // As a best practice, explicitly close the dataReader resource as soon as it is no longer needed.
+                        DebugPrint(L"        %ws\n", fileContent->Data());
+                    });
+                }
+            }).wait();
         }
         else
         {
-            DebugPrint(L"    SampleFile.txt not available\n");
+            DebugPrint(L"    %ws not available\n", sampleFileRelPath->Data());
         }
     }).wait();
 }
@@ -128,41 +126,35 @@ void MainPage::LoadDLLFromPackage(Windows::ApplicationModel::Package^ package)
     concurrency::create_task(package->InstalledLocation->TryGetItemAsync(L"OptionalPackageDLL.dll"))
         .then([this, package](concurrency::task<Windows::Storage::IStorageItem^> task)
     {
-        if (task.get())
+        auto targetFile = dynamic_cast<Windows::Storage::StorageFile^>(task.get());
+        if (targetFile && targetFile->IsAvailable)
         {
-            auto targetFile = safe_cast<Windows::Storage::StorageFile^>(task.get());
-            if (targetFile)
+            DebugPrint(L"    %ws is available:\n", targetFile->Name->Data());
+            auto name = targetFile->Name->Data();
+            auto dllModule = LoadPackagedLibrary(name, 0);
+            if (dllModule)
             {
-                if (targetFile->IsAvailable)
-                {
-                    DebugPrint(L"    %ws is available:\n", targetFile->Name->Data());
-                    auto name = targetFile->Name->Data();
-                    auto dllModule = LoadPackagedLibrary(name, 0);
-                    if (dllModule)
-                    {
-                        WriteToTextBox("Contains dll - loading code");
+                WriteToTextBox("Contains dll - loading code");
 
-                        auto procAddress = GetProcAddress(dllModule, "ExampleAPIExport");
-                        if (procAddress)
-                        {
-                            DebugPrint(L"        Value returned from ExampleAPIExport: %i\n", procAddress());
-                            auto ret = procAddress();
-                            WriteToTextBox(ret.ToString());
-                        }
-                        FreeLibrary(dllModule);
-                    }
-                    else
-                    {
-                        const DWORD error = GetLastError();
-                        DebugPrint(L"        LoadPackagedLibrary failed, make sure package certificates are configured: %i\n", error);
-                    }
+                auto procAddress = GetProcAddress(dllModule, "ExampleAPIExport");
+                if (procAddress)
+                {
+                    const auto ret = procAddress();
+                    DebugPrint(L"        Value returned from ExampleAPIExport: %i\n", ret);
+                    WriteToTextBox(ret.ToString());
                 }
+                FreeLibrary(dllModule);
             }
             else
             {
-                DebugPrint(L"    Could not load dll from the optional package, make sure it is installed.\n");
-                WriteToTextBox("Could not load dll from the optional package, make sure it is installed.");
+                const DWORD error = GetLastError();
+                DebugPrint(L"        LoadPackagedLibrary failed, make sure package certificates are configured: %i\n", error);
             }
+        }
+        else
+        {
+            DebugPrint(L"    Could not load dll from the optional package, make sure it is installed.\n");
+            WriteToTextBox("Could not load dll from the optional package, make sure it is installed.");
         }
     }).wait();
 }
