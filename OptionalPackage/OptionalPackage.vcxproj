@@ -83,7 +83,7 @@
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>36614B54BB478456A8B9E92D1CEFDF21DD4D84EB</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>A9963FE83D5A7F5BFBB500638055422C28DB24D2</PackageCertificateThumbprint>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

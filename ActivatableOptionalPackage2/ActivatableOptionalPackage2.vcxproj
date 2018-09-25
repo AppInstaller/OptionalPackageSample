@@ -100,7 +100,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <PackageCertificateKeyFile>ActivatableOptionalPackage2_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>043C19AB9AAD6D8131C6BF16507FE557AA9C079D</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>360F3CB0B474121921745C51C0472412B93E9BD0</PackageCertificateThumbprint>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x86</AppxBundlePlatforms>
