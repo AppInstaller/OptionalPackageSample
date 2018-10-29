@@ -1,10 +1,7 @@
 ﻿#include "pch.h"
-#include "OptionalPackageDLL.h"
 
-// Optional Package Code
-__declspec(dllexport) int __cdecl ExampleAPIExport()
+int __stdcall ExampleAPIExport()
 {
-	return 40;
+    // Optional Package Code goes here
+    return 40;
 }
-
-

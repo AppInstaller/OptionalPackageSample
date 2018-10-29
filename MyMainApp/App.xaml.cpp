@@ -39,7 +39,7 @@ App::App()
 /// <param name="e">Details about the launch request and process.</param>
 void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ e)
 {
-#if _DEBUG
+#if 0
     // Show graphics profiling information while debugging.
     if (IsDebuggerPresent())
     {
